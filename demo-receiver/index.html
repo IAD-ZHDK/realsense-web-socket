@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Realsense 2 Websocket Demo Receiver</title>
+
+    <script src="js/p5.min.js"></script>
+    <script src="js/osc.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<main>
+</main>
+
+<script>
+    const osc = new OSC();
+
+    function setup() {
+        createCanvas(displayWidth, displayHeight);
+
+        osc.on('/depth', msg => {
+            console.log(msg)
+        });
+        osc.open({ port: 8025 })
+    }
+
+    function draw() {
+        background(0);
+    }
+</script>
+</body>
+</html>
