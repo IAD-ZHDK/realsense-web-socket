@@ -12,7 +12,7 @@ final int PORT = 8025;
 
 final int WIDTH = 640;
 final int HEIGHT = 480;
-final int DECIMATION = 4;
+final int DECIMATION = 2;
 
 WebsocketServer ws;
 RealSenseCamera camera = new RealSenseCamera(this);
@@ -22,19 +22,34 @@ byte[] depthBuffer = null;
 void setup() {
   size(640, 480);
 
-  // setup websocket
-  ws = new WebsocketServer(this, PORT, "/");
+  try {
+    // setup websocket
+    ws = new WebsocketServer(this, PORT, "/");
 
-  // setup buffer
-  depthBuffer = new byte[WIDTH / DECIMATION * HEIGHT / DECIMATION];
+    // setup buffer
+    depthBuffer = new byte[WIDTH / DECIMATION * HEIGHT / DECIMATION];
 
-  // setup camera
-  println("starting up camera...");
-  camera.enableDepthStream(WIDTH, HEIGHT);
-  camera.enableColorizer(ColorScheme.WhiteToBlack);
-  camera.addDecimationFilter(DECIMATION);
+    // setup camera
+    println("starting up camera...");
+    camera.enableDepthStream(WIDTH, HEIGHT);
+    camera.enableColorizer(ColorScheme.WhiteToBlack);
+    camera.addDecimationFilter(DECIMATION);
+    
+    // filters
+    // camera.addTemporalFilter();
+    // camera.addHoleFillingFilter();
+    
+    // set distance filter (in meters)
+    // camera.addThresholdFilter(2.0, 3.0);
 
-  camera.start();
+    camera.start();
+  } 
+  catch (Exception ex) {
+    fill(255);
+    textSize(20);
+
+    text("Error starting up: " + ex.getMessage(), 30, 30);
+  }
 
   println("Sending data on: ws://localhost:" + PORT + "/");
 }
