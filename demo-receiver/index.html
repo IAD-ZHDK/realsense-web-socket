@@ -20,18 +20,50 @@
 
 <script>
     const osc = new OSC();
+    let depthImage;
 
     function setup() {
         createCanvas(displayWidth, displayHeight);
 
+        // init buffer
+        depthImage = createImage(160, 120);
+
+        // setup OSC receiver
         osc.on('/depth', msg => {
-            console.log(msg)
+            updateDepthImage(msg)
         });
-        osc.open({ port: 8025 })
+        osc.open({port: 8025})
     }
 
     function draw() {
         background(0);
+
+        image(depthImage, 0, 0, displayWidth, displayHeight);
+    }
+
+    function updateDepthImage(msg) {
+        const w = msg.args[0];
+        const h = msg.args[1];
+        const data = msg.args[2];
+
+        // check if buffer size is valid
+        if (depthImage.width !== w || depthImage.height !== h) {
+            console.log("buffer has been reinitialized");
+            depthImage = createImage(w, h);
+        }
+
+        // copy data
+        depthImage.loadPixels();
+
+        for(let i = 0; i < depthImage.pixels.length / 4; i++) {
+            let di = i * 4;
+            depthImage.pixels[di] = data[i];
+            depthImage.pixels[di+1] = data[i];
+            depthImage.pixels[di+2] = data[i];
+            depthImage.pixels[di+3] = data[i];
+        }
+
+        depthImage.updatePixels();
     }
 </script>
 </body>

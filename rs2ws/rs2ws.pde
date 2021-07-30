@@ -10,8 +10,14 @@ import oscP5.*;
 
 final int PORT = 8025;
 
+final int WIDTH = 640;
+final int HEIGHT = 480;
+final int DECIMATION = 4;
+
 WebsocketServer ws;
 RealSenseCamera camera = new RealSenseCamera(this);
+
+byte[] depthBuffer = null;
 
 void setup() {
   size(640, 480);
@@ -19,14 +25,17 @@ void setup() {
   // setup websocket
   ws = new WebsocketServer(this, PORT, "/");
 
+  // setup buffer
+  depthBuffer = new byte[WIDTH / DECIMATION * HEIGHT / DECIMATION];
+
   // setup camera
   println("starting up camera...");
-  camera.enableDepthStream(640, 480);
+  camera.enableDepthStream(WIDTH, HEIGHT);
   camera.enableColorizer(ColorScheme.WhiteToBlack);
-  camera.addDecimationFilter(4);
+  camera.addDecimationFilter(DECIMATION);
 
   camera.start();
-  
+
   println("Sending data on: ws://localhost:" + PORT + "/");
 }
 
@@ -60,7 +69,18 @@ void sendPImage(PImage image) {
   msg.add(image.width);
   msg.add(image.height);
 
-  // todo: add body binary blob
+  // fill depth buffer
+  int[] pixels = image.pixels;
+  for (int i = 0; i < pixels.length; i++) {
+    depthBuffer[i] = (byte)(pixels[i] & 0xFF);
+  }
 
-  ws.sendMessage(msg.getBytes());
+  msg.add(depthBuffer);
+
+  try {
+    ws.sendMessage(msg.getBytes());
+  } 
+  catch(Exception ex) {
+    println("ERROR: " + ex.getMessage());
+  }
 }
