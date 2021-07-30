@@ -19,6 +19,7 @@
 </main>
 
 <script>
+    const port = 8025;
     const osc = new OSC();
     let depthImage;
 
@@ -32,13 +33,24 @@
         osc.on('/depth', msg => {
             updateDepthImage(msg)
         });
-        osc.open({port: 8025})
+
+        try {
+            osc.open({port: port});
+        } catch (e) {
+            console.log("Could not connect: " + e);
+        }
     }
 
     function draw() {
         background(0);
 
         image(depthImage, 0, 0, window.innerWidth, window.innerHeight);
+
+        // reconnect osc
+        if (osc.status() === OSC.STATUS.IS_CLOSED) {
+            console.log("reconnecting...");
+            osc.open({port: port});
+        }
     }
 
     function updateDepthImage(msg) {
