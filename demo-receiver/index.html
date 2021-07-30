@@ -38,7 +38,7 @@
     function draw() {
         background(0);
 
-        image(depthImage, 0, 0, displayWidth, displayHeight);
+        image(depthImage, 0, 0, window.innerWidth, window.innerHeight);
     }
 
     function updateDepthImage(msg) {
